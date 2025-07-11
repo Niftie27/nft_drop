@@ -90,7 +90,7 @@ describe('Token', () => {
         // EG: 'ipfs://bafybeibzbvazpuh55f67cnoabsusjzwwp545stdzxtkhd3wyc26oauv5ma/1.json'
         expect(await nft.tokenURI(1)).to.eq(`${BASE_URI}1.json`)
       })
-      
+
       it('updates the total supply', async () => {
         expect(await nft.totalSupply()).to.eq(1)
       })
@@ -179,6 +179,55 @@ describe('Token', () => {
       expect(tokenIds[0].toString()).to.eq('1')
       expect(tokenIds[1].toString()).to.eq('2')
       expect(tokenIds[2].toString()).to.eq('3')
+    })
+
+  })
+
+  describe('Minting', () => {
+
+    describe('Success', async () => {
+
+      let transaction, result, balanceBefore
+
+      const ALLOW_MINTING_ON = Date.now().toString().slice(0, 10)  // now
+
+      beforeEach(async () => {      // hook
+        const NFT = await ethers.getContractFactory('NFT')    // fetch SC
+        nft = await NFT.deploy(NAME, SYMBOL, COST, MAX_SUPPLY, ALLOW_MINTING_ON, BASE_URI)    // deploy
+
+        transaction = await nft.connect(minter).mint(1, { value: COST })
+        result = await transaction.wait()
+
+        balanceBefore = await ethers.provider.getBalance(deployer.address)
+
+        transaction = await nft.connect(deployer).withdraw()
+        result = await transaction.wait()
+      })
+
+      it('deduct the contract balance', async () => {
+        expect(await ethers.provider.getBalance(nft.address)).to.equal(0)
+      })
+
+      it('sends funds to the owner', async () => {
+        expect(await ethers.provider.getBalance(deployer.address)).to.be.gt(balanceBefore)
+      })
+
+      it('emits a withdraw event', async () => {
+        expect(transaction).to.emit(nft, 'Withdraw')
+          .withArgs(COST, deployer.address)
+      })
+    })
+
+    describe('Failure', async () => {
+
+      it('prevents non-owner from withdrawing', async () => {
+        const ALLOW_MINTING_ON = Date.now().toString().slice(0, 10)  // now
+        const NFT = await ethers.getContractFactory('NFT')    // fetch SC
+        nft = await NFT.deploy(NAME, SYMBOL, COST, MAX_SUPPLY, ALLOW_MINTING_ON, BASE_URI)    // deploy
+
+        await expect(nft.connect(minter).withdraw()).to.be.reverted
+      })
+
     })
 
   })

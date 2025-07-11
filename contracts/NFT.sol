@@ -14,6 +14,7 @@ contract NFT is ERC721Enumerable, Ownable {
     uint256 public allowMintingOn;
 
     event Mint(uint256 amount, address minter);
+    event Withdraw(uint256 amount, address owner);
 
     constructor(
         string memory _name,
@@ -32,7 +33,7 @@ contract NFT is ERC721Enumerable, Ownable {
 
     function mint(uint256 _mintAmount) public payable {
         // Only allow miniting after specified time
-        require(block.timestamp >= allowMintingOn);      
+        require(block.timestamp >= allowMintingOn);
         // block in global variable in Solidity with value called timestamp
 
         // Must mint at lest 1 token
@@ -67,7 +68,7 @@ contract NFT is ERC721Enumerable, Ownable {
         returns(string memory)
     {
         require(_exists(_tokenId), 'token does not exist');
-        return(string(abi.encodePacked(baseURI, _tokenId.toString(), baseExtension)));     
+        return(string(abi.encodePacked(baseURI, _tokenId.toString(), baseExtension)));
     }
 
     function walletOfOwner(address _owner) public view returns(uint256[] memory){
@@ -77,6 +78,22 @@ contract NFT is ERC721Enumerable, Ownable {
             tokenIds[i] = tokenOfOwnerByIndex(_owner, i);
         }
         return tokenIds;
+    }
+
+    // Owner functions
+
+    function withdraw() public onlyOwner {
+        uint256 balance = address(this).balance;
+
+        (bool success, ) = payable(msg.sender).call{value: balance}("");
+        require(success);
+
+        emit Withdraw(balance, msg.sender);
+
+    }
+
+    function setCost(uint256 _newCost) public onlyOwner {
+        cost = _newCost;
     }
 
 }
