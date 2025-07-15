@@ -9,6 +9,7 @@ import preview from '../preview.png'
 // Components
 import Navigation from './Navigation';
 import Data from './Data';
+import Mint from './Mint';
 import Loading from './Loading';
 
 // ABIs: Import your contract ABIs here
@@ -84,7 +85,19 @@ function App() {
         <>
           <Row>
             <Col>
-              <img src={preview} alt="" />
+              {balance > 0 ? (
+                <div className='text-center'>
+                  <img
+                    src={`https://indigo-delicate-bobolink-809.mypinata.cloud/ipfs/bafybeidpuzq54zqnmgq5lsbegxwrwkgrt72545l3pyj6c4y3qsprfamu6u/${balance.toString()}.png`}
+                    alt="Open Punk"
+                    width="400px"
+                    height="400px"
+                  />
+                </div>
+              ) : (
+                <img src={preview} alt="" />
+              )}
+
             </Col>
 
             <Col>
@@ -97,6 +110,13 @@ function App() {
               totalSupply={totalSupply}
               cost={cost}
               balance={balance}
+              />
+
+              <Mint
+                provider={provider}
+                nft={nft}
+                cost={cost}
+                setIsLoading={setIsLoading}
               />
             </Col>
 
