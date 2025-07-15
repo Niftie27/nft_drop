@@ -8,11 +8,11 @@ const Navigation = ({ account }) => {
       <img
         alt="logo"
         src={logo}
-        width="40"
-        height="40"
-        className="d-inline-block align-top mx-3"
+        width="100"
+        height="100"
+        className="d-inline-block align-top mx-1"
       />
-      <Navbar.Brand href="#">Dapp University Template</Navbar.Brand>
+      <Navbar.Brand href="#">Fusion Punkz</Navbar.Brand>
       <Navbar.Collapse className="justify-content-end">
         <Navbar.Text>
           {account}
